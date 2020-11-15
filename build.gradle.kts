@@ -12,5 +12,5 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.openpnp:opencv:3.4.2-0")
+    implementation("org.openpnp:opencv:4.3.0-2")
 }
