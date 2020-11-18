@@ -3,14 +3,15 @@ package model
 import org.opencv.core.Mat
 import org.opencv.core.Point
 import org.opencv.core.Rect
+import prettyString
 
-data class Note(
-    override val rectangle: Rect,
-    override val matrix: Mat,
+class Note(
+    rectangle: Rect,
+    matrix: Mat,
     val center: Point,
-    var duration: Duration = Duration.UNKNOWN,
-    var name: Name = Name.UNKNOWN
-) : Element(rectangle, matrix, Type.NOTE) {
+    var name: Name = Name.UNKNOWN,
+    var duration: Duration = Duration.UNKNOWN
+) : Element(rectangle, matrix) {
     enum class Name {
         A, B, C, D, E, F, G, UNKNOWN
     }
@@ -21,5 +22,9 @@ data class Note(
         QUARTER,
         EIGHTH,
         UNKNOWN
+    }
+
+    override fun toString(): String {
+        return "Note($name,$duration@${rectangle.prettyString()})"
     }
 }
