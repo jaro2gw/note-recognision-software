@@ -1,18 +1,18 @@
 package model
 
-import org.opencv.core.Mat
 import org.opencv.core.Rect
-import prettyString
+import org.opencv.core.Scalar
+import styles.Color
 
-class Clef(
-    rectangle: Rect,
-    matrix: Mat,
-    val type: Type
-) : Element(rectangle, matrix) {
-    enum class Type {
-        TREBLE,
-        BASS
+class Clef(rectangle: Rect) : Element(rectangle) {
+    enum class Type(bottomLineNote: Note.Name) {
+        TREBLE(Note.Name.E),
+        BASS(Note.Name.G)
     }
 
-    override fun toString(): String = "Clef($type@${rectangle.prettyString()})"
+    lateinit var type: Type
+
+    override fun getLabel(): String = "Clef($type)"
+
+    override fun getColor(): Scalar = Color.RED
 }

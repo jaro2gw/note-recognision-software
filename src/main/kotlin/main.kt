@@ -1,4 +1,5 @@
 import nu.pattern.OpenCV
+import opencv.ImageProcessor
 import java.io.File
 
 
@@ -32,10 +33,6 @@ fun main(args: Array<String>) {
             val output = "$name-processed.png"
             input to output
         }
-        .map { (input, output) ->
-            StaveImageProcessor(input, output)
-        }
-        .forEach {
-            it.invoke()
-        }
+        .map { (input, output) -> ImageProcessor(input, output) }
+        .forEach { it.invoke() }
 }
