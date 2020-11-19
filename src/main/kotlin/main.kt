@@ -30,9 +30,8 @@ fun main(args: Array<String>) {
         }
         .map { input ->
             val name = input.dropLast(4)
-            val output = "$name-processed.png"
+            val output = "$name.processed.png"
             input to output
         }
-        .map { (input, output) -> ImageProcessor(input, output) }
-        .forEach { it.invoke() }
+        .forEach { (input, output) -> ImageProcessor(input, output) }
 }
