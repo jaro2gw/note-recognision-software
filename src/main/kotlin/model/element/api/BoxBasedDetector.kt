@@ -2,7 +2,6 @@ package model.element.api
 
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
-import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Rect
 import org.opencv.imgproc.Imgproc
 
@@ -20,13 +19,7 @@ abstract class BoxBasedDetector<T : AbstractElement> : AbstractDetector<T>() {
         return contours
     }
 
-    private fun Collection<MatOfPoint>.convertToBoundingBoxes(): Collection<Box> = map {
-        val curve = MatOfPoint2f(*it.toArray())
-        val poly = MatOfPoint2f()
-        Imgproc.approxPolyDP(curve, poly, 3.0, true)
-        val points = MatOfPoint(*poly.toArray())
-        return@map Imgproc.boundingRect(points)
-    }
+    private fun Collection<MatOfPoint>.convertToBoundingBoxes(): Collection<Box> = map { Imgproc.boundingRect(it) }
 
     abstract fun Collection<Rect>.convertToElements(): Collection<T>
 

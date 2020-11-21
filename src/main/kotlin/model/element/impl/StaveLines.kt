@@ -3,7 +3,6 @@ package model.element.impl
 import model.element.api.AbstractElement
 import model.element.api.BoxBasedDetector
 import org.opencv.core.Mat
-import org.opencv.core.MatOfPoint
 import org.opencv.core.Rect
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
@@ -34,15 +33,15 @@ class StaveLines(lines: Collection<Line>) : AbstractElement(box = computeRectang
         }
 
         override fun Mat.preprocessImage(): Mat {
-            val processed = Mat(rows(), cols(), type())
+            val processed = clone()
             //TODO maybe find a better size value - a constant?
-            val size = processed.cols() / 30
+            val size = cols() / 30
             val structure = Imgproc.getStructuringElement(
                 Imgproc.MORPH_RECT,
                 Size(size.toDouble(), 1.0)
             )
-            Imgproc.erode(this, processed, structure)
-            Imgproc.dilate(this, processed, structure)
+            Imgproc.erode(processed, processed, structure)
+            Imgproc.dilate(processed, processed, structure)
             processed.showInWindow("Stave lines preprocessed")
             return processed
         }
