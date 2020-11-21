@@ -22,14 +22,10 @@ object ImageProcessor {
         )
         binary.showInWindow("Binary")
 
-//        val angle = binary.computeRotationAngle()
-//        val rotated = binary.rotate(-angle)
-//        showImage("Rotated", rotated)
-//        val target = source.rotate(-angle)
-
         val angle = binary.computeRotationAngle()
         val rotated = binary.rotate(angle)
         rotated.showInWindow("Rotated")
+
         val final = rotated.clone()!!
         val target = source.clone()!!
 

@@ -33,7 +33,7 @@ abstract class AbstractElement(val box: Box) {
             label,
             anchor,
             Imgproc.FONT_HERSHEY_COMPLEX,
-            8.0,
+            0.25,
             Color.BLACK,
             2,
             Imgproc.LINE_8
