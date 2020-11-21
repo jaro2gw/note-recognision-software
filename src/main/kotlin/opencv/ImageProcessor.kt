@@ -27,7 +27,7 @@ object ImageProcessor {
         rotated.showInWindow("Rotated")
 
         val final = rotated.clone()!!
-        val target = source.clone()!!
+        val target = source.rotate(angle)!!
 
         val staves = StaveLines.Detector(final)
 
