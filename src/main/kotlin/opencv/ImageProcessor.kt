@@ -3,10 +3,7 @@ package opencv
 import model.element.impl.*
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
-import utils.negate
-import utils.showInWindow
-import utils.toBinary
-import utils.toGray
+import utils.*
 
 object ImageProcessor {
     operator fun invoke(sourceFileName: String, targetFileName: String) {
@@ -30,7 +27,9 @@ object ImageProcessor {
 //        showImage("Rotated", rotated)
 //        val target = source.rotate(-angle)
 
-        val rotated = binary.clone()!!
+        val angle = binary.computeRotationAngle()
+        val rotated = binary.rotate(angle)
+        rotated.showInWindow("Rotated")
         val final = rotated.clone()!!
         val target = source.clone()!!
 

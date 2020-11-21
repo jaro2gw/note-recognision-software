@@ -1,9 +1,6 @@
 package utils
 
-import org.opencv.core.Core
-import org.opencv.core.Mat
-import org.opencv.core.Point
-import org.opencv.core.Rect
+import org.opencv.core.*
 import org.opencv.highgui.HighGui
 import org.opencv.imgproc.Imgproc
 import kotlin.math.PI
@@ -37,10 +34,10 @@ fun Mat.rowIterator(row: Int): Iterator<DoubleArray> = iterator {
 fun Mat.rowIterable(row: Int): Iterable<DoubleArray> = Iterable { rowIterator(row) }
 
 fun Mat.crop(rectangle: Rect): Mat = submat(
-    rectangle.y,
-    rectangle.y + rectangle.height,
-    rectangle.x,
-    rectangle.x + rectangle.width
+        rectangle.y,
+        rectangle.y + rectangle.height,
+        rectangle.x,
+        rectangle.x + rectangle.width
 )
 
 fun Mat.negate(): Mat {
@@ -50,20 +47,20 @@ fun Mat.negate(): Mat {
 }
 
 fun Mat.toBinary(
-    adaptiveMethod: Int,
-    thresholdType: Int,
-    blockSize: Int,
-    constant: Double
+        adaptiveMethod: Int,
+        thresholdType: Int,
+        blockSize: Int,
+        constant: Double
 ): Mat {
     val binary = Mat()
     Imgproc.adaptiveThreshold(
-        this,
-        binary,
-        255.0,
-        adaptiveMethod,
-        thresholdType,
-        blockSize,
-        constant
+            this,
+            binary,
+            255.0,
+            adaptiveMethod,
+            thresholdType,
+            blockSize,
+            constant
     )
     return binary
 }
@@ -71,31 +68,32 @@ fun Mat.toBinary(
 fun Mat.computeRotationAngle(): Double {
     val edges = Mat()
     Imgproc.Canny(
-        this,
-        edges,
-        50.0,
-        200.0,
-        3,
-        false
+            this,
+            edges,
+            50.0,
+            200.0,
+            3,
+            false
     )
     val lines = Mat()
     Imgproc.HoughLines(
-        edges,
-        lines,
-        1.0,
-        PI / 180,
-        150
+            edges,
+            lines,
+            1.0,
+            PI / 180,
+            150
     )
     return lines.colIterable(0)
-        .map { it[1] }
-        .median()
+            .map { it[1] }
+            .median()
 }
 
 val Mat.center get() = Point(cols() / 2.0, rows() / 2.0)
 
 fun Mat.rotate(angle: Double, scale: Double = 1.0): Mat {
     val rotated = Mat()
-    val rotation = Imgproc.getRotationMatrix2D(center, angle, scale)
+    val degreeAngle = Math.toDegrees(angle) - 90
+    val rotation = Imgproc.getRotationMatrix2D(center, degreeAngle, scale)
     Imgproc.warpAffine(this, rotated, rotation, size())
     return rotated
 }
