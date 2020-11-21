@@ -1,27 +1,11 @@
 package utils
 
-import org.opencv.core.*
-import org.opencv.imgcodecs.Imgcodecs
+import org.opencv.core.Core
+import org.opencv.core.Mat
+import org.opencv.core.Point
+import org.opencv.core.Rect
 import org.opencv.imgproc.Imgproc
-
-fun Mat.convertTo(rtype: Int) = apply { convertTo(this, rtype) }
-
-fun Mat.matchTemplate(template: Mat, threshold: Double): Mat {
-    val source = clone().convertTo(CvType.CV_32FC1)
-
-    val templateMatrix = template
-        .toGray()
-        .convertTo(CvType.CV_32FC1)
-
-    val result = Mat().apply {
-        create(source.width(), source.height(), CvType.CV_32FC1)
-    }
-
-    Imgproc.matchTemplate(source, templateMatrix, result, Imgproc.TM_CCOEFF_NORMED)
-    Imgproc.threshold(result, result, threshold, 255.0, Imgproc.THRESH_TOZERO)
-
-    return result
-}
+import kotlin.math.PI
 
 fun Mat.toBGR(): Mat {
     val matrix = clone()!!
@@ -39,33 +23,17 @@ fun Mat.toGray(): Mat {
     return matrix
 }
 
-fun Mat.drawContours(rectangles: List<Rect>, color: Scalar): Mat {
-    val input = clone()!!.toBGR()
-    rectangles.forEach { rectangle ->
-        Imgproc.rectangle(
-            input,
-            rectangle,
-            color,
-            1,
-            Imgproc.LINE_8,
-            0
-        )
-    }
-    return input
+fun Mat.colIterator(col: Int): Iterator<DoubleArray> = iterator {
+    for (row in 0 until rows()) yield(this@colIterator[row, col])
 }
 
-fun Mat.elementCountourRectangles(): List<Rect> {
-    val input = clone()!!.binary(11, 2.0).inv()!!
-    val contours = emptyList<MatOfPoint>()
-    Imgproc.findContours(
-        input,
-        contours,
-        Mat(),
-        Imgproc.RETR_LIST,
-        Imgproc.CHAIN_APPROX_SIMPLE
-    )
-    return contours.map(Imgproc::boundingRect)/*.generify()*/
+fun Mat.colIterable(col: Int): Iterable<DoubleArray> = Iterable { colIterator(col) }
+
+fun Mat.rowIterator(row: Int): Iterator<DoubleArray> = iterator {
+    for (col in 0 until cols()) yield(this@rowIterator[row, col])
 }
+
+fun Mat.rowIterable(row: Int): Iterable<DoubleArray> = Iterable { rowIterator(row) }
 
 fun Mat.crop(rectangle: Rect): Mat = submat(
     rectangle.y,
@@ -74,58 +42,64 @@ fun Mat.crop(rectangle: Rect): Mat = submat(
     rectangle.x + rectangle.width
 )
 
-fun Mat.binary(
-    blockSize: Int = 15,
-    constant: Double = -2.0
-): Mat { //TODO CHECK Mat binary = new Mat(src.rows(), src.cols(), src.type(), new Scalar(0));
+fun Mat.negate(): Mat {
+    val not = clone()
+    Core.bitwise_not(not, not)
+    return not
+}
+
+fun Mat.toBinary(
+    adaptiveMethod: Int,
+    thresholdType: Int,
+    blockSize: Int,
+    constant: Double
+): Mat {
     val binary = Mat()
     Imgproc.adaptiveThreshold(
         this,
         binary,
         255.0,
-        Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
-        Imgproc.THRESH_BINARY,
+        adaptiveMethod,
+        thresholdType,
         blockSize,
         constant
     )
     return binary
 }
 
-fun Mat.horizontalObjects(): Mat {
-    val objects = clone()!!
-    val size = objects.cols() / 30.0
-    val structure = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, Size(size, 1.0))
-    Imgproc.erode(objects, objects, structure)
-    Imgproc.dilate(objects, objects, structure)
-    return objects
+fun Mat.computeRotationAngle(): Double {
+    val edges = Mat()
+    Imgproc.Canny(
+        this,
+        edges,
+        50.0,
+        200.0,
+        3,
+        false
+    )
+    val lines = Mat()
+    Imgproc.HoughLines(
+        edges, lines,
+        1.0,
+        PI / 180,
+        150
+    )
+    return lines.colIterable(0)
+        .map { it[1] }
+        .median()
 }
 
-fun Mat.verticalObjects(): Mat {
-    val objects = clone()!!
-    val size = objects.rows() / 30.0
-    val structure = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, Size(1.0, size))
-    Imgproc.erode(objects, objects, structure)
-    Imgproc.dilate(objects, objects, structure)
-    return objects
-}
+//img = cv.imread('messi5.jpg',0)
+//rows,cols = img.shape
+//# cols-1 and rows-1 are the coordinate limits.
+//M = cv.getRotationMatrix2D(((cols-1)/2.0,(rows-1)/2.0),90,1)
+//dst = cv.warpAffine(img,M,(cols,rows))
 
-fun Mat.refinedObjects(): Mat {
-    val refinedObjects = clone()!!
-    val edges = refinedObjects.binary(3)
+val Mat.center get() = Point(cols() / 2.0, rows() / 2.0)
 
-    val size = Size(2.0, 2.0)
-    val kernel = Mat.ones(size, CvType.CV_8UC1)
-    Imgproc.dilate(edges, edges, kernel)
-
-    val smooth = Mat()
-    refinedObjects.copyTo(smooth)
-    Imgproc.blur(smooth, smooth, size)
-    smooth.copyTo(refinedObjects, smooth)
-
-    Core.bitwise_not(refinedObjects, refinedObjects)
-    return refinedObjects
-}
-
-fun Mat.save(file: String) {
-    Imgcodecs.imwrite(file, this)
+fun Mat.rotate(angle: Double, scale: Double = 1.0): Mat {
+    val rotated = Mat()
+    val rotation = Imgproc.getRotationMatrix2D(center, angle, scale)
+    Imgproc.warpAffine(this, rotated, rotation, size())
+    return rotated
 }
