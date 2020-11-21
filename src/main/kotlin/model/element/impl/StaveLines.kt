@@ -62,7 +62,7 @@ class StaveLines(lines: Collection<Line>) : AbstractElement(contours = computeRe
 
         override fun Mat.findContours(): Collection<Rect> {
             Imgproc.adaptiveThreshold(this, this, 255.0, 1, 1, 11, 2.0)
-            val contours  = listOf<MatOfPoint>()
+            val contours  = mutableListOf<MatOfPoint>()
             val hierarchy = Mat()
             Imgproc.findContours(this, contours , hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE)
             return contours.map { Imgproc.boundingRect(it) }
