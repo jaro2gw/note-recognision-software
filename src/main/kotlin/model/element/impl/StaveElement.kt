@@ -13,10 +13,9 @@ open class StaveElement(contours: Rect) : AbstractElement(contours) {
     companion object Detector : BoxBasedDetector<StaveElement>() {
         override fun Mat.preprocessImage(): Mat {
             val processed = clone()
-            val size = processed.rows() / 30
             val structure = Imgproc.getStructuringElement(
                 Imgproc.MORPH_RECT,
-                Size(1.0, size.toDouble())
+                Size(1.0, 5.0)
             )
             Imgproc.erode(processed, processed, structure)
             Imgproc.dilate(processed, processed, structure)

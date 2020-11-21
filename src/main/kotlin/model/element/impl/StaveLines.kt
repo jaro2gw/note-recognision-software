@@ -11,6 +11,7 @@ import utils.center
 import utils.intersects
 import utils.showInWindow
 import utils.ys
+import kotlin.math.abs
 
 typealias Line = Rect
 
@@ -34,11 +35,9 @@ class StaveLines(lines: Collection<Line>) : AbstractElement(box = computeRectang
 
         override fun Mat.preprocessImage(): Mat {
             val processed = clone()
-            //TODO maybe find a better size value - a constant?
-            val size = cols() / 30
             val structure = Imgproc.getStructuringElement(
                 Imgproc.MORPH_RECT,
-                Size(size.toDouble(), 1.0)
+                Size(30.0, 1.0)
             )
             Imgproc.erode(processed, processed, structure)
             Imgproc.dilate(processed, processed, structure)
@@ -67,11 +66,11 @@ class StaveLines(lines: Collection<Line>) : AbstractElement(box = computeRectang
             .map { StaveLines(it) }
     }
 
-    private val linesBottomToTop: List<Line>
+    private val linesLowerToUpper: List<Line>
 
     init {
         standardCheck(lines)
-        linesBottomToTop = lines.sortedBy { it.center.y }
+        linesLowerToUpper = lines.sortedByDescending { it.center.y }
 //        val spaces = linesBottomToTop.zipWithNext { lower, upper ->
 //            upper.middle.y - lower.middle.y
 //        }
@@ -85,20 +84,20 @@ class StaveLines(lines: Collection<Line>) : AbstractElement(box = computeRectang
 
     private var clef: Clef? = null
 
-    private fun findClosestLines(note: Note): IndexedValue<Pair<Line, Line>>? = linesBottomToTop.zipWithNext()
+    private fun findClosestLines(note: Note): IndexedValue<Pair<Line, Line>>? = linesLowerToUpper.zipWithNext()
         .withIndex()
         .find { (_, lines) ->
             val (lower, upper) = lines
-            val aboveLower = note.center.y >= lower.center.y
-            val belowUpper = note.center.y <= upper.center.y
+            val aboveLower = note.center.y <= lower.center.y
+            val belowUpper = note.center.y >= upper.center.y
             return@find aboveLower && belowUpper
         }
 
     private fun positionOnStave(note: Note): Int? {
         val (index, lines) = findClosestLines(note) ?: return null
         val (lower, upper) = lines
-        val space = upper.center.y - lower.center.y
-        val position = (note.center.y - lower.center.y) / space
+        val space = abs(upper.center.y - lower.center.y)
+        val position = abs(note.center.y - lower.center.y) / space
         return 2 * index + when {
             position <= 0.33 -> 0
             position <= 0.66 -> 1

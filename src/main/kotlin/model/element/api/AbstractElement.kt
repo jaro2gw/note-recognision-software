@@ -27,13 +27,13 @@ abstract class AbstractElement(val box: Box) {
 
     private fun drawLabelOn(matrix: Mat) {
         val label = getLabel()
-        val anchor = Point(box.x.toDouble(), box.y.toDouble() + box.height + 5)
+        val anchor = Point(box.x.toDouble(), box.y.toDouble() - 5)
         Imgproc.putText(
             matrix,
             label,
             anchor,
             Imgproc.FONT_HERSHEY_COMPLEX,
-            0.25,
+            0.5,
             Color.BLACK,
             2,
             Imgproc.LINE_8

@@ -11,7 +11,7 @@ class Clef(contours: Rect) : StaveElement(contours) {
 
     var type: Type? = null
 
-    override fun getLabel(): String = "Clef(${type ?: "TBD"})"
+    override fun getLabel(): String = "Clef(${type ?: "?"})"
 
     override fun getColor(): Color = Color.RED
 }

@@ -14,14 +14,14 @@ class Note(contours: Rect, val center: Point) : StaveElement(contours) {
     var name: Name? = null
     var duration: Duration? = null
 
-    enum class Duration {
-        WHOLE,
-        HALF,
-        QUARTER,
-        EIGHT
+    enum class Duration(val value: Int) {
+        WHOLE(1),
+        HALF(2),
+        QUARTER(4),
+        EIGHT(8)
     }
 
-    override fun getLabel(): String = "Note(${name ?: "TBD"},${duration ?: "TBD"})"
+    override fun getLabel(): String = "Note(${name ?: "?"},${duration?.value ?: "?"})"
 
     override fun getColor(): Color = Color.GREEN
 

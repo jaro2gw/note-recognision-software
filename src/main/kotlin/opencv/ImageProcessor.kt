@@ -38,9 +38,11 @@ object ImageProcessor {
             val element = elements.find { head.center in it.box } ?: return@mapNotNull null
             val note = Note(element.box, head.center)
             val array = final[head.center.x.toInt(), head.center.y.toInt()] ?: return@mapNotNull note
+
             val full = array[0] == 255.0 // the matrix is negated
             val tail = element.box.width / head.box.width > 1.25
             val bar = element.box.height / head.box.height > 1.5
+
             note.duration = when {
                 !bar -> Note.Duration.WHOLE
                 !full -> Note.Duration.HALF
