@@ -1,21 +1,22 @@
 package model.element.impl
 
 import model.element.api.AbstractElement
-import model.element.api.ContourBasedDetector
+import model.element.api.BoxBasedDetector
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
 import org.opencv.core.Rect
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 import styles.Color
+import utils.center
 import utils.intersects
-import utils.middle
+import utils.showInWindow
 import utils.ys
 
 typealias Line = Rect
 
-class StaveLines(lines: Collection<Line>) : AbstractElement(contours = computeRectangle(lines)) {
-    companion object Detector : ContourBasedDetector<StaveLines>() {
+class StaveLines(lines: Collection<Line>) : AbstractElement(box = computeRectangle(lines)) {
+    companion object Detector : BoxBasedDetector<StaveLines>() {
         private fun standardCheck(lines: Collection<Line>) {
             require(lines.size == 5) { "Stave has to contain exactly 5 lines" }
         }
@@ -42,6 +43,7 @@ class StaveLines(lines: Collection<Line>) : AbstractElement(contours = computeRe
             )
             Imgproc.erode(this, processed, structure)
             Imgproc.dilate(this, processed, structure)
+            processed.showInWindow("Stave lines preprocessed")
             return processed
         }
 
@@ -60,16 +62,8 @@ class StaveLines(lines: Collection<Line>) : AbstractElement(contours = computeRe
             return stitched
         }
 
-        override fun Mat.findContours(): Collection<Rect> {
-            Imgproc.adaptiveThreshold(this, this, 255.0, 1, 1, 11, 2.0)
-            val contours  = mutableListOf<MatOfPoint>()
-            val hierarchy = Mat()
-            Imgproc.findContours(this, contours , hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE)
-            return contours.map { Imgproc.boundingRect(it) }
-        }
-
         override fun Collection<Line>.convertToElements(): Collection<StaveLines> = stitchStaveLines()
-            .sortedBy { it.middle.y }
+            .sortedBy { it.center.y }
             .windowed(5)
             .map { StaveLines(it) }
     }
@@ -78,7 +72,7 @@ class StaveLines(lines: Collection<Line>) : AbstractElement(contours = computeRe
 
     init {
         standardCheck(lines)
-        linesBottomToTop = lines.sortedBy { it.middle.y }
+        linesBottomToTop = lines.sortedBy { it.center.y }
 //        val spaces = linesBottomToTop.zipWithNext { lower, upper ->
 //            upper.middle.y - lower.middle.y
 //        }
@@ -96,18 +90,16 @@ class StaveLines(lines: Collection<Line>) : AbstractElement(contours = computeRe
         .withIndex()
         .find { (_, lines) ->
             val (lower, upper) = lines
-            val aboveLower = note.center.y >= lower.middle.y
-            val belowUpper = note.center.y <= upper.middle.y
+            val aboveLower = note.center.y >= lower.center.y
+            val belowUpper = note.center.y <= upper.center.y
             return@find aboveLower && belowUpper
         }
-
-    operator fun contains(note: Note): Boolean = note.center in contours
 
     private fun positionOnStave(note: Note): Int? {
         val (index, lines) = findClosestLines(note) ?: return null
         val (lower, upper) = lines
-        val space = upper.middle.y - lower.middle.y
-        val position = (note.center.y - lower.middle.y) / space
+        val space = upper.center.y - lower.center.y
+        val position = (note.center.y - lower.center.y) / space
         return 2 * index + when {
             position <= 0.33 -> 0
             position <= 0.66 -> 1
@@ -115,41 +107,27 @@ class StaveLines(lines: Collection<Line>) : AbstractElement(contours = computeRe
         }
     }
 
-    private fun assignElements(elements: Collection<StaveElement>, croppingFunction: (Rect) -> Mat) {
-        if (elements.isEmpty()) return
-        val startToEnd = elements.sortedBy { it.contours.middle.x }
-        val clef = Clef(startToEnd[0].contours)
-    }
+    operator fun contains(note: Note): Boolean = note.center in box
+    operator fun contains(clef: Clef): Boolean = clef.box.center in box
 
-    private fun assignNote(note: Note) {
+    fun assign(note: Note) {
         val position = positionOnStave(note) ?: return
         notes += note
-        val bottom = clef?.type?.ordinal ?: return
+        val bottom = clef?.type?.note?.ordinal ?: return
         val ordinal = bottom + position
         val names = Note.Name.values()
         note.name = names[ordinal % names.size]
     }
 
-//    fun removeNote(note: Note) {
-//        notes -= note
-//        note.name = null
-//    }
-
-    private fun assignClef(clef: Clef) {
-        this.clef = clef
-        val lower = clef.contours.middle.apply { y = clef.contours.y.toDouble() }
-        val upper = clef.contours.middle.apply { y = clef.contours.y.toDouble() + clef.contours.height }
-        clef.type = if (lower in this.contours && upper in this.contours) {
+    fun assign(clef: Clef) {
+        val lower = clef.box.center.apply { y = clef.box.y.toDouble() }
+        val upper = clef.box.center.apply { y = clef.box.y.toDouble() + clef.box.height }
+        clef.type = if (lower in this.box && upper in this.box) {
             Clef.Type.BASS
         } else {
             Clef.Type.TREBLE
         }
-//        notes.forEach { assignNote(it) }
-    }
-
-    fun removeClef() {
-        clef?.type = null
-        clef = null
+        this.clef = clef
     }
 
     override fun getLabel(): String = "StaveLines"

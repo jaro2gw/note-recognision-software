@@ -1,27 +1,21 @@
 package opencv
 
 import model.element.impl.*
-import org.opencv.core.Mat
-import org.opencv.highgui.HighGui
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
-import styles.Color
-import utils.*
+import utils.negate
+import utils.showInWindow
+import utils.toBinary
+import utils.toGray
 
 object ImageProcessor {
-    private fun showImage(name: String, matrix: Mat) {
-        HighGui.imshow(name, matrix)
-        HighGui.waitKey()
-        HighGui.destroyWindow(name)
-    }
-
     operator fun invoke(sourceFileName: String, targetFileName: String) {
         val source = Imgcodecs.imread(sourceFileName)!!
         assert(!source.empty()) { "Could not read image \"$sourceFileName\"" }
-        showImage("Source", source)
+        source.showInWindow("Source")
 
         val gray = source.toGray()
-        showImage("Gray", gray)
+        gray.showInWindow("Gray")
 
         val binary = gray.negate().toBinary(
             Imgproc.ADAPTIVE_THRESH_MEAN_C,
@@ -29,26 +23,28 @@ object ImageProcessor {
             15,
             -2.0
         )
-        showImage("Binary", binary)
+        binary.showInWindow("Binary")
 
-        val angle = binary.computeRotationAngle()
-        val rotated = binary.rotate(-angle)
-        showImage("Rotated", rotated)
+//        val angle = binary.computeRotationAngle()
+//        val rotated = binary.rotate(-angle)
+//        showImage("Rotated", rotated)
+//        val target = source.rotate(-angle)
 
-        val target = source.rotate(-angle)
+        val rotated = binary.clone()!!
+        val final = rotated.clone()!!
+        val target = source.clone()!!
 
-        val staves = StaveLines.Detector(rotated)
+        val staves = StaveLines.Detector(final)
 
-        val elements = StaveElement.Detector(rotated)
-        val heads = NoteHead.Detector(rotated)
+        val elements = StaveElement.Detector(final)
+        val heads = NoteHead.Detector(final)
 
         val notes = heads.mapNotNull { head ->
-            val element = elements.find { head.center in it.contours } ?: return@mapNotNull null
-            val note = Note(element.contours, head.center)
-            val (b, g, r) = rotated[head.center.x.toInt(), head.center.y.toInt()]
-            val full = Color(r, g, b) == Color.WHITE // the matrix is negated
-            val tail = element.contours.width / head.contours.width > 1.25
-            val bar = element.contours.height / head.contours.height > 1.5
+            val element = elements.find { head.center in it.box } ?: return@mapNotNull null
+            val note = Note(element.box, head.center)
+            val full = final[head.center.x.toInt(), head.center.y.toInt()][0] > 200 // the matrix is negated
+            val tail = element.box.width / head.box.width > 1.25
+            val bar = element.box.height / head.box.height > 1.5
             note.duration = when {
                 !bar -> Note.Duration.WHOLE
                 !full -> Note.Duration.HALF
@@ -58,14 +54,20 @@ object ImageProcessor {
             return@mapNotNull note
         }
 
-        val clefs = elements.minus(notes).map { Clef(it.contours) }
+        val clefs = elements.minus(notes).map { Clef(it.box) }
 
         clefs.forEach { clef ->
+            val stave = staves.find { clef in it } ?: return@forEach
+            stave.assign(clef)
+        }
 
+        notes.forEach { note ->
+            val stave = staves.find { note in it } ?: return@forEach
+            stave.assign(note)
         }
 
         staves.forEach { it.drawOn(target) }
-        showImage("Target", target)
+        target.showInWindow("Target")
         Imgcodecs.imwrite(targetFileName, target)
     }
 }

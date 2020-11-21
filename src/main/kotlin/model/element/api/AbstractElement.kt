@@ -5,10 +5,11 @@ import org.opencv.core.Point
 import org.opencv.core.Rect
 import org.opencv.imgproc.Imgproc
 import styles.Color
-import utils.middle
 import utils.prettyString
 
-abstract class AbstractElement(val contours: Rect) {
+typealias Box = Rect
+
+abstract class AbstractElement(val box: Box) {
     abstract fun getLabel(): String
 
     abstract fun getColor(): Color
@@ -17,7 +18,7 @@ abstract class AbstractElement(val contours: Rect) {
         val color = getColor()
         Imgproc.rectangle(
             matrix,
-            contours,
+            box,
             color,
             2,
             Imgproc.LINE_8
@@ -26,7 +27,7 @@ abstract class AbstractElement(val contours: Rect) {
 
     private fun drawLabelOn(matrix: Mat) {
         val label = getLabel()
-        val anchor = Point(contours.x.toDouble(), contours.y.toDouble() + contours.height + 5)
+        val anchor = Point(box.x.toDouble(), box.y.toDouble() + box.height + 5)
         Imgproc.putText(
             matrix,
             label,
@@ -44,11 +45,7 @@ abstract class AbstractElement(val contours: Rect) {
         drawLabelOn(matrix)
     }
 
-    operator fun contains(other: AbstractElement): Boolean {
-        return other.contours.middle in contours
-    }
-
-    override fun toString(): String = getLabel() + '@' + contours.prettyString()
+    override fun toString(): String = getLabel() + '@' + box.prettyString()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -56,10 +53,10 @@ abstract class AbstractElement(val contours: Rect) {
 
         other as AbstractElement
 
-        if (contours != other.contours) return false
+        if (box != other.box) return false
 
         return true
     }
 
-    override fun hashCode(): Int = contours.hashCode()
+    override fun hashCode(): Int = box.hashCode()
 }

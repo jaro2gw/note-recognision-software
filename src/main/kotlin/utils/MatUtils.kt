@@ -4,6 +4,7 @@ import org.opencv.core.Core
 import org.opencv.core.Mat
 import org.opencv.core.Point
 import org.opencv.core.Rect
+import org.opencv.highgui.HighGui
 import org.opencv.imgproc.Imgproc
 import kotlin.math.PI
 
@@ -79,7 +80,8 @@ fun Mat.computeRotationAngle(): Double {
     )
     val lines = Mat()
     Imgproc.HoughLines(
-        edges, lines,
+        edges,
+        lines,
         1.0,
         PI / 180,
         150
@@ -89,12 +91,6 @@ fun Mat.computeRotationAngle(): Double {
         .median()
 }
 
-//img = cv.imread('messi5.jpg',0)
-//rows,cols = img.shape
-//# cols-1 and rows-1 are the coordinate limits.
-//M = cv.getRotationMatrix2D(((cols-1)/2.0,(rows-1)/2.0),90,1)
-//dst = cv.warpAffine(img,M,(cols,rows))
-
 val Mat.center get() = Point(cols() / 2.0, rows() / 2.0)
 
 fun Mat.rotate(angle: Double, scale: Double = 1.0): Mat {
@@ -102,4 +98,10 @@ fun Mat.rotate(angle: Double, scale: Double = 1.0): Mat {
     val rotation = Imgproc.getRotationMatrix2D(center, angle, scale)
     Imgproc.warpAffine(this, rotated, rotation, size())
     return rotated
+}
+
+fun Mat.showInWindow(name: String) {
+    HighGui.imshow(name, this)
+    HighGui.waitKey()
+    HighGui.destroyWindow(name)
 }

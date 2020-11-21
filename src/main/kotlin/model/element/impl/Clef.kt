@@ -4,7 +4,7 @@ import org.opencv.core.Rect
 import styles.Color
 
 class Clef(contours: Rect) : StaveElement(contours) {
-    enum class Type(bottomLineNote: Note.Name) {
+    enum class Type(val note: Note.Name) {
         TREBLE(Note.Name.E),
         BASS(Note.Name.G)
     }

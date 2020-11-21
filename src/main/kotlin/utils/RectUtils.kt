@@ -3,7 +3,7 @@ package utils
 import org.opencv.core.Point
 import org.opencv.core.Rect
 
-val Rect.middle get() = Point(x + width / 2.0, y + height / 2.0)
+val Rect.center get() = Point(x + width / 2.0, y + height / 2.0)
 
 operator fun Rect.compareTo(other: Rect): Int =
     if (x == other.x) y.compareTo(other.y)
