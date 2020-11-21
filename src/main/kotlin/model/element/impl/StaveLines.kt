@@ -3,6 +3,7 @@ package model.element.impl
 import model.element.api.AbstractElement
 import model.element.api.ContourBasedDetector
 import org.opencv.core.Mat
+import org.opencv.core.MatOfPoint
 import org.opencv.core.Rect
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
@@ -60,7 +61,11 @@ class StaveLines(lines: Collection<Line>) : AbstractElement(contours = computeRe
         }
 
         override fun Mat.findContours(): Collection<Rect> {
-            TODO("Not yet implemented")
+            Imgproc.adaptiveThreshold(this, this, 255.0, 1, 1, 11, 2.0)
+            val contours  = listOf<MatOfPoint>()
+            val hierarchy = Mat()
+            Imgproc.findContours(this, contours , hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE)
+            return contours.map { Imgproc.boundingRect(it) }
         }
 
         override fun Collection<Line>.convertToElements(): Collection<StaveLines> = stitchStaveLines()
