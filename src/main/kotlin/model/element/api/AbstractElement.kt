@@ -31,11 +31,11 @@ abstract class AbstractElement(val rect: Rect) {
             matrix,
             label,
             anchor,
-            Imgproc.FONT_HERSHEY_COMPLEX,
+            Imgproc.FONT_HERSHEY_SIMPLEX,
             0.5,
             Color.ORANGE,
             2,
-            Imgproc.LINE_8
+            Imgproc.LINE_AA
         )
     }
 
