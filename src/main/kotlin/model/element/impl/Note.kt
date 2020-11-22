@@ -1,16 +1,16 @@
 package model.element.impl
 
+import model.element.api.AbstractElement
+import opencv.styles.Color
 import org.opencv.core.Mat
-import org.opencv.core.Point
 import org.opencv.core.Rect
-import org.opencv.imgproc.Imgproc
-import styles.Color
 
-class Note(contours: Rect, val center: Point) : StaveElement(contours) {
+class Note(rect: Rect) : AbstractElement(rect) {
     enum class Name {
-        A, B, C, D, E, F, G
+        G, F, E, D, C, H, A
     }
 
+    var head: Head? = null
     var name: Name? = null
     var duration: Duration? = null
 
@@ -27,7 +27,6 @@ class Note(contours: Rect, val center: Point) : StaveElement(contours) {
 
     override fun drawOn(matrix: Mat) {
         super.drawOn(matrix)
-        val color = getColor()
-        Imgproc.circle(matrix, center, 1, color, 3, Imgproc.LINE_AA)
+        head?.drawOn(matrix)
     }
 }

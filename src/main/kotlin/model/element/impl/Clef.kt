@@ -1,12 +1,13 @@
 package model.element.impl
 
+import model.element.api.AbstractElement
 import org.opencv.core.Rect
-import styles.Color
+import opencv.styles.Color
 
-class Clef(contours: Rect) : StaveElement(contours) {
+class Clef(rect: Rect) : AbstractElement(rect) {
     enum class Type(val note: Note.Name) {
-        TREBLE(Note.Name.E),
-        BASS(Note.Name.G)
+        TREBLE(Note.Name.F),
+        BASS(Note.Name.A)
     }
 
     var type: Type? = null

@@ -1,24 +1,23 @@
 package model.element.api
 
+import opencv.styles.Color
 import org.opencv.core.Mat
 import org.opencv.core.Point
 import org.opencv.core.Rect
 import org.opencv.imgproc.Imgproc
-import styles.Color
+import utils.intersects
 import utils.prettyString
 
-typealias Box = Rect
-
-abstract class AbstractElement(val box: Box) {
+abstract class AbstractElement(val rect: Rect) {
     abstract fun getLabel(): String
 
     abstract fun getColor(): Color
 
-    private fun drawContoursOn(matrix: Mat) {
+    protected fun drawContoursOn(matrix: Mat) {
         val color = getColor()
         Imgproc.rectangle(
             matrix,
-            box,
+            rect,
             color,
             2,
             Imgproc.LINE_8
@@ -27,14 +26,14 @@ abstract class AbstractElement(val box: Box) {
 
     private fun drawLabelOn(matrix: Mat) {
         val label = getLabel()
-        val anchor = Point(box.x.toDouble(), box.y.toDouble() - 5)
+        val anchor = Point(rect.x.toDouble(), rect.y.toDouble() - 5)
         Imgproc.putText(
             matrix,
             label,
             anchor,
             Imgproc.FONT_HERSHEY_COMPLEX,
             0.5,
-            Color.BLACK,
+            Color.ORANGE,
             2,
             Imgproc.LINE_8
         )
@@ -45,7 +44,7 @@ abstract class AbstractElement(val box: Box) {
         drawLabelOn(matrix)
     }
 
-    override fun toString(): String = getLabel() + '@' + box.prettyString()
+    override fun toString(): String = getLabel() + '@' + rect.prettyString()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -53,10 +52,14 @@ abstract class AbstractElement(val box: Box) {
 
         other as AbstractElement
 
-        if (box != other.box) return false
+        if (rect != other.rect) return false
 
         return true
     }
 
-    override fun hashCode(): Int = box.hashCode()
+    override fun hashCode(): Int = rect.hashCode()
+
+    operator fun component1() = rect
+
+    operator fun contains(other: AbstractElement) = other.rect intersects this.rect
 }
