@@ -2,25 +2,11 @@ import nu.pattern.OpenCV
 import opencv.ImageProcessor
 import java.io.File
 
+
 fun main(args: Array<String>) {
     OpenCV.loadShared()
-
-    val outputFolderName: String
-    val sequence =
-        if (args.isEmpty()) {
-            println("Reading from stdin")
-            outputFolderName = readLine() ?: return
-            generateSequence(::readLine)
-        } else {
-            println("Reading from program arguments")
-            outputFolderName = args[0]
-            args.drop(1).asSequence()
-        }
-
     val fileNameRegex = Regex(".+\\.png")
-
-
-    sequence
+    args.asSequence()
         .filter {
             val valid = fileNameRegex.matches(it)
             if (!valid) println("File name \"$it\" is not a valid png file name. It will be skipped.")

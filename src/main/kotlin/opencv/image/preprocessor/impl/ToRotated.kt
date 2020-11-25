@@ -1,6 +1,6 @@
 package opencv.image.preprocessor.impl
 
-import opencv.image.preprocessor.api.ImagePreprocessor
+import opencv.image.preprocessor.api.AbstractImagePreprocessor
 import org.opencv.core.Mat
 import org.opencv.imgproc.Imgproc
 import utils.center
@@ -33,7 +33,7 @@ object ToRotated {
             .median()
     }
 
-    fun byRadiansComputed(matrix: Mat) = object : ImagePreprocessor {
+    fun byRadiansComputed(matrix: Mat) = object : AbstractImagePreprocessor() {
         val radians = this@ToRotated.computeRotationAngleRadians(matrix)
         override fun invoke(matrix: Mat): Mat = this@ToRotated.invoke(matrix, radians)
     }

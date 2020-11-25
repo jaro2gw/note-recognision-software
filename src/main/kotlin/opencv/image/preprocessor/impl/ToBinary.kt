@@ -1,11 +1,11 @@
 package opencv.image.preprocessor.impl
 
-import opencv.image.preprocessor.api.ImagePreprocessor
+import opencv.image.preprocessor.api.AbstractImagePreprocessor
 import org.opencv.core.Mat
 import org.opencv.imgproc.Imgproc
 import utils.showInWindow
 
-object ToBinary : ImagePreprocessor {
+object ToBinary : AbstractImagePreprocessor() {
     override fun invoke(matrix: Mat): Mat {
         val result = Mat()
         Imgproc.adaptiveThreshold(

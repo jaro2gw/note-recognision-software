@@ -1,6 +1,6 @@
 package opencv.image.preprocessor.impl
 
-import opencv.image.preprocessor.api.ImagePreprocessor
+import opencv.image.preprocessor.api.AbstractImagePreprocessor
 import org.opencv.core.Mat
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
@@ -19,7 +19,7 @@ object ToHorizontalElements {
         return result
     }
 
-    fun byWidth(width: Double): ImagePreprocessor = object : ImagePreprocessor {
+    fun byWidth(width: Double): AbstractImagePreprocessor = object : AbstractImagePreprocessor() {
         override fun invoke(matrix: Mat): Mat = this@ToHorizontalElements.invoke(matrix, width)
     }
 }

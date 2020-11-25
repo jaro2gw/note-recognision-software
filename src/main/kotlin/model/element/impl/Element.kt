@@ -1,13 +1,13 @@
 package model.element.impl
 
-import model.detector.api.RectBasedDetector
+import model.detector.api.AbstractRectBasedDetector
 import model.element.api.AbstractElement
 import opencv.styles.Color
 import org.opencv.core.Mat
 import org.opencv.core.Rect
 
 class Element(rect: Rect) : AbstractElement(rect) {
-    companion object Detector : RectBasedDetector<Element> {
+    companion object Detector : AbstractRectBasedDetector<Element>() {
         override fun convertToElements(boxes: Collection<Rect>): Collection<Element> = boxes.map { Element(it) }
     }
 

@@ -1,6 +1,6 @@
 package model.element.impl
 
-import model.detector.api.RectBasedDetector
+import model.detector.api.AbstractRectBasedDetector
 import model.element.api.AbstractElement
 import opencv.styles.Color
 import org.opencv.core.Mat
@@ -12,7 +12,7 @@ import utils.component1
 import utils.component2
 
 class Head(val center: Point, val radius: Double) : AbstractElement(rect = computeRectangle(center, radius)) {
-    companion object Detector : RectBasedDetector<Head> {
+    companion object Detector : AbstractRectBasedDetector<Head>() {
         private fun computeRectangle(center: Point, radius: Double): Rect {
             val (x, y) = center
             val lower = Point(x - radius, y - radius)

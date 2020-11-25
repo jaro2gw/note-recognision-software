@@ -7,10 +7,10 @@ import org.opencv.core.Rect
 import utils.intersects
 import utils.mergeWith
 
-interface RectBasedDetector<T : AbstractElement> : ElementDetector<T> {
-    fun convertToElements(boxes: Collection<Rect>): Collection<T>
+abstract class AbstractRectBasedDetector<T : AbstractElement> : AbstractDetector<T>() {
+    abstract fun convertToElements(boxes: Collection<Rect>): Collection<T>
 
-    private fun groupBoxes(boxes: Collection<Rect>): Collection<Rect> {
+    protected fun groupBoxes(boxes: Collection<Rect>): Collection<Rect> {
         val elements = mutableSetOf<Rect>()
         boxes.forEach { box ->
             val same = elements.find { it intersects box }

@@ -1,18 +1,19 @@
 package model.element.impl
 
-import model.detector.api.RectBasedDetector
+import model.detector.api.AbstractRectBasedDetector
 import model.element.api.AbstractElement
 import opencv.styles.Color
 import org.opencv.core.Mat
 import org.opencv.core.Point
 import org.opencv.core.Rect
+import org.opencv.imgproc.Imgproc
 import utils.center
 import utils.intersects
 import utils.mergeWith
 import utils.ys
 
 class Stave private constructor(private val lines: Collection<Rect>) : AbstractElement(rect = computeRectangle(lines)) {
-    companion object Detector : RectBasedDetector<Stave> {
+    companion object Detector : AbstractRectBasedDetector<Stave>() {
         private fun computeRectangle(lines: Iterable<Rect>): Rect = lines.reduce(Rect::mergeWith)
 
         private fun stitchStaveLines(lines: Collection<Rect>): Collection<Rect> {
@@ -38,16 +39,14 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
 
     private var clef: Clef? = null
 
-    private fun findClosestLines(center: Point): IndexedValue<Pair<Rect, Rect>>? {
-        return lines.zipWithNext()
-            .withIndex()
-            .find { (_, lines) ->
-                val (lower, upper) = lines
-                val above = center.y >= lower.center.y
-                val below = center.y <= upper.center.y
-                return@find above && below
-            }
-    }
+    private fun findClosestLines(center: Point): IndexedValue<Pair<Rect, Rect>>? = lines.zipWithNext()
+        .withIndex()
+        .find { (_, lines) ->
+            val (lower, upper) = lines
+            val above = center.y >= lower.center.y
+            val below = center.y <= upper.center.y
+            return@find above && below
+        }
 
     private fun positionOnStave(note: Note): Int? {
         val center = note.head?.center ?: return null
@@ -99,9 +98,20 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
 
     override fun getColor(): Color = Color.BLUE
 
+    private fun drawLineOn(line: Rect, matrix: Mat) {
+        val x1 = line.x.toDouble()
+        val x2 = line.x.toDouble() + line.width
+        val y = line.center.y
+        val point1 = Point(x1, y)
+        val point2 = Point(x2, y)
+        val color = getColor()
+        Imgproc.line(matrix, point1, point2, color, 2, Imgproc.LINE_8)
+    }
+
     override fun drawOn(matrix: Mat) {
+        lines.forEach { line -> drawLineOn(line, matrix) }
         super.drawOn(matrix)
-        clef?.drawOn(matrix)
         notes.forEach { it.drawOn(matrix) }
+        clef?.drawOn(matrix)
     }
 }
