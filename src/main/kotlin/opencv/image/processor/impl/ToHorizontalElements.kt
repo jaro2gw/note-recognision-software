@@ -1,10 +1,9 @@
-package opencv.image.preprocessor.impl
+package opencv.image.processor.impl
 
-import opencv.image.preprocessor.api.AbstractImagePreprocessor
+import opencv.image.processor.api.AbstractImageProcessor
 import org.opencv.core.Mat
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
-import utils.showInWindow
 
 object ToHorizontalElements {
     operator fun invoke(matrix: Mat, width: Double): Mat {
@@ -15,11 +14,10 @@ object ToHorizontalElements {
         )
         Imgproc.erode(result, result, kernel)
         Imgproc.dilate(result, result, kernel)
-        result.showInWindow("Horizontal Elements")
         return result
     }
 
-    fun byWidth(width: Double): AbstractImagePreprocessor = object : AbstractImagePreprocessor() {
+    fun byWidth(width: Double): AbstractImageProcessor = object : AbstractImageProcessor() {
         override fun invoke(matrix: Mat): Mat = this@ToHorizontalElements.invoke(matrix, width)
     }
 }

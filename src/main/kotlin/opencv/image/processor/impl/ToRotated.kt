@@ -1,12 +1,11 @@
-package opencv.image.preprocessor.impl
+package opencv.image.processor.impl
 
-import opencv.image.preprocessor.api.AbstractImagePreprocessor
+import opencv.image.processor.api.AbstractImageProcessor
 import org.opencv.core.Mat
 import org.opencv.imgproc.Imgproc
 import utils.center
 import utils.colIterable
 import utils.median
-import utils.showInWindow
 import kotlin.math.PI
 
 object ToRotated {
@@ -33,7 +32,7 @@ object ToRotated {
             .median()
     }
 
-    fun byRadiansComputed(matrix: Mat) = object : AbstractImagePreprocessor() {
+    fun byRadiansComputed(matrix: Mat) = object : AbstractImageProcessor() {
         val radians = this@ToRotated.computeRotationAngleRadians(matrix)
         override fun invoke(matrix: Mat): Mat = this@ToRotated.invoke(matrix, radians)
     }
@@ -43,7 +42,6 @@ object ToRotated {
         val result = Mat()
         val rotation = Imgproc.getRotationMatrix2D(matrix.center, degrees, 1.0)
         Imgproc.warpAffine(matrix, result, rotation, matrix.size())
-        result.showInWindow("Rotated")
         return result
     }
 }

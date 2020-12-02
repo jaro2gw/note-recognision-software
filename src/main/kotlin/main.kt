@@ -1,26 +1,38 @@
 import nu.pattern.OpenCV
-import opencv.ImageProcessor
+import opencv.image.processor.impl.ToNotes
+import org.opencv.imgcodecs.Imgcodecs
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
 
-
-fun main(args: Array<String>) {
+fun main() {
     OpenCV.loadShared()
     val fileNameRegex = Regex(".+\\.png")
-    args.asSequence()
-        .filter {
-            val valid = fileNameRegex.matches(it)
-            if (!valid) println("File name \"$it\" is not a valid png file name. It will be skipped.")
+    println("Reading file names to process from stdin, one file per line.")
+    generateSequence { readLine() }
+        .filter { input ->
+            val valid = fileNameRegex.matches(input)
+            if (!valid) println("File name \"$input\" is not a valid png file name. It will be skipped.")
             return@filter valid
         }
-        .filter {
-            val exists = File(it).exists()
-            if (!exists) println("File \"$it\" does not exist. It will be skipped.")
+        .filter { input ->
+            val exists = File(input).exists()
+            if (!exists) println("File \"$input\" does not exist. It will be skipped.")
             return@filter exists
         }
-        .map { input ->
+        .forEach { input ->
             val name = input.dropLast(4)
-            val output = "$name.processed.png"
-            input to output
+            File(name).deleteRecursively()
+            val path = Paths.get(name)
+            Files.createDirectory(path)
+            val source = Imgcodecs.imread(input)!!
+            val matrices = ToNotes(source)
+            matrices.forEachIndexed { index, (operation, mat) ->
+                val output = name + "/" + index + "-" + operation.name.toLowerCase() + ".png"
+                Imgcodecs.imwrite(output, mat)
+            }
+            val output = "$name-processed.png"
+            Imgcodecs.imwrite(output, matrices.last().second)
+            println("File \"$input\" processed.")
         }
-        .forEach { (input, output) -> ImageProcessor(input, output) }
 }

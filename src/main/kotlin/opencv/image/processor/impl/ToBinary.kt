@@ -1,15 +1,14 @@
-package opencv.image.preprocessor.impl
+package opencv.image.processor.impl
 
-import opencv.image.preprocessor.api.AbstractImagePreprocessor
+import opencv.image.processor.api.AbstractImageProcessor
 import org.opencv.core.Mat
 import org.opencv.imgproc.Imgproc
-import utils.showInWindow
 
-object ToBinary : AbstractImagePreprocessor() {
+object ToBinary : AbstractImageProcessor() {
     override fun invoke(matrix: Mat): Mat {
-        val result = Mat()
+        val result = matrix.clone()
         Imgproc.adaptiveThreshold(
-            matrix,
+            result,
             result,
             255.0,
             Imgproc.ADAPTIVE_THRESH_MEAN_C,
@@ -17,7 +16,7 @@ object ToBinary : AbstractImagePreprocessor() {
             15,
             -2.0
         )
-        result.showInWindow("Binary")
-        return result
+        return matrix
+//        return result
     }
 }
