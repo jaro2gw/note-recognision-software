@@ -7,7 +7,7 @@ import java.nio.file.Paths
 
 fun main() {
     OpenCV.loadShared()
-    val fileNameRegex = Regex(".+\\.png")
+    val fileNameRegex = Regex(".+\\.((png)|(jp[e]?g))")
     println("Reading file names to process from stdin, one file per line.")
     generateSequence { readLine() }
         .filter { input ->
