@@ -13,17 +13,18 @@ object ToNotes : (Mat) -> List<Pair<Operation, Mat>> {
         val gray = ToGrayscale(mat).also { results += Operation.GRAYSCALE to it }
         val negated = ToNegated(gray).also { results += Operation.NEGATED to it }
         val binary = ToBinary(negated).also { results += Operation.BINARY to it }
-        val rotate = ToRotated.byRadiansComputed(binary)
+        val rotate = ToRotated(binary)
         val rotated = rotate(binary).also { results += Operation.ROTATED to it }
-        val horizontal = ToHorizontalElements.byWidth(100.0)
-            .invoke(rotated)
-            .also { results += Operation.HORIZONTAL to it }
-        val vertical = ToVerticalElements(rotated).also { results += Operation.VERTICAL to it }
+        val width = mat.width() / 30.0
+        val horizontal = ToHorizontalElements(width)(rotated).also { results += Operation.HORIZONTAL to it }
+        val height = mat.height() / 30.0
+        val vertical = ToVerticalElements(height)(rotated).also { results += Operation.VERTICAL to it }
 
         val staves = Stave.Detector(horizontal)
         val elements = Element.Detector(vertical)
 
-        val circles = ToCircles(vertical).also { results += Operation.CIRCLES to it }
+        val radius = 30.0
+        val circles = ToCircles(radius)(vertical).also { results += Operation.CIRCLES to it }
         val heads = Head.Detector(circles)
 
         val debug = rotate(mat).also { results += Operation.DEBUG to it }
