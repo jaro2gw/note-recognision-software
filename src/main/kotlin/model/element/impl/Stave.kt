@@ -6,7 +6,6 @@ import opencv.styles.Color
 import org.opencv.core.Mat
 import org.opencv.core.Point
 import org.opencv.core.Rect
-import org.opencv.imgproc.Imgproc
 import utils.center
 import utils.intersects
 import utils.mergeWith
@@ -31,8 +30,9 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
 
         override fun convertToElements(boxes: Collection<Rect>): Collection<Stave> = stitchStaveLines(boxes)
             .sortedBy { it.center.y }
-            .windowed(5)
-            .map { Stave(it) }
+            .chunked(5) {
+                Stave(it)
+            }
     }
 
     private val notes: MutableSet<Note> = mutableSetOf()
@@ -98,18 +98,7 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
 
     override fun getColor(): Color = Color.BLUE
 
-    private fun drawLineOn(line: Rect, matrix: Mat) {
-        val x1 = line.x.toDouble()
-        val x2 = line.x.toDouble() + line.width
-        val y = line.center.y
-        val point1 = Point(x1, y)
-        val point2 = Point(x2, y)
-        val color = getColor()
-        Imgproc.line(matrix, point1, point2, color, 2, Imgproc.LINE_8)
-    }
-
     override fun drawOn(matrix: Mat) {
-        lines.forEach { line -> drawLineOn(line, matrix) }
         super.drawOn(matrix)
         notes.forEach { it.drawOn(matrix) }
         clef?.drawOn(matrix)
