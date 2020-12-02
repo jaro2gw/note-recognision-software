@@ -16,13 +16,13 @@ val ToNotes: (Mat) -> List<Pair<Operation, Mat>> = { matrix ->
     val rotated = rotate(binary).also { results += Operation.ROTATED to it }
     val width = matrix.width() / 30.0
     val horizontal = ToHorizontalElements(width)(rotated).also { results += Operation.HORIZONTAL to it }
-    val height = matrix.height() / 30.0
+    val height = matrix.height() / 90.0
     val vertical = ToVerticalElements(height)(rotated).also { results += Operation.VERTICAL to it }
 
     val staves = Stave.Detector(horizontal)
     val elements = Element.Detector(vertical)
 
-    val radius = 30.0
+    val radius = 28.0
     val circles = ToCircles(radius)(vertical).also { results += Operation.CIRCLES to it }
     val heads = Head.Detector(circles)
 
