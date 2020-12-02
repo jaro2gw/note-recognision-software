@@ -8,7 +8,9 @@ import org.opencv.core.Rect
 
 class Element(rect: Rect) : AbstractElement(rect) {
     companion object Detector : AbstractRectBasedDetector<Element>() {
-        override fun convertToElements(boxes: Collection<Rect>): Collection<Element> = boxes.map { Element(it) }
+        override fun convertToElements(boxes: Collection<Rect>): Collection<Element> = boxes
+            .filter { rect -> rect.width > 30 && rect.height > 30 }
+            .map { Element(it) }
     }
 
     override fun getLabel(): String = "Element"
