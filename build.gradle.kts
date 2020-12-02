@@ -13,4 +13,9 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.openpnp:opencv:4.3.0-2")
+    implementation("org.junit.jupiter:junit-jupiter:5.4.2")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

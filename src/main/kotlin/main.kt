@@ -7,14 +7,8 @@ import java.nio.file.Paths
 
 fun main() {
     OpenCV.loadShared()
-    val fileNameRegex = Regex(".+\\.((png)|(jp[e]?g))")
     println("Reading file names to process from stdin, one file per line.")
     generateSequence { readLine() }
-        .filter { input ->
-            val valid = fileNameRegex.matches(input)
-            if (!valid) println("File name \"$input\" is not a valid png file name. It will be skipped.")
-            return@filter valid
-        }
         .filter { input ->
             val exists = File(input).exists()
             if (!exists) println("File \"$input\" does not exist. It will be skipped.")
@@ -26,6 +20,7 @@ fun main() {
             val path = Paths.get(name)
             Files.createDirectory(path)
             val source = Imgcodecs.imread(input)!!
+            assert(!source.empty()) { "Could not open image file" }
             val matrices = ToNotes(source)
             matrices.forEachIndexed { index, (operation, mat) ->
                 val output = name + "/" + index + "-" + operation.name.toLowerCase() + ".png"
