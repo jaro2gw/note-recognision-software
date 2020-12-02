@@ -11,7 +11,7 @@ import utils.center
 import utils.component1
 import utils.component2
 
-class Head(val center: Point, val radius: Double) : AbstractElement(rect = computeRectangle(center, radius)) {
+class Head(val center: Point, private val radius: Double) : AbstractElement(rect = computeRectangle(center, radius)) {
     companion object Detector : AbstractRectBasedDetector<Head>() {
         private fun computeRectangle(center: Point, radius: Double): Rect {
             val (x, y) = center

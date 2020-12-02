@@ -5,7 +5,8 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 
-fun main() {
+fun main(args: Array<String>) {
+    val debug = args.contains("--debug")
     OpenCV.loadShared()
     println("Reading file names to process from stdin, one file per line.")
     generateSequence { readLine() }
@@ -16,13 +17,14 @@ fun main() {
         }
         .forEach { input ->
             val name = input.dropLast(4)
-            File(name).deleteRecursively()
-            val path = Paths.get(name)
-            Files.createDirectory(path)
+            if (debug) {
+                val path = Paths.get(name)
+                if (Files.notExists(path)) Files.createDirectory(path)
+            }
             val source = Imgcodecs.imread(input)!!
             assert(!source.empty()) { "Could not open image file" }
             val matrices = ToNotes(source)
-            matrices.forEachIndexed { index, (operation, mat) ->
+            if (debug) matrices.forEachIndexed { index, (operation, mat) ->
                 val output = name + "/" + index + "-" + operation.name.toLowerCase() + ".png"
                 Imgcodecs.imwrite(output, mat)
             }

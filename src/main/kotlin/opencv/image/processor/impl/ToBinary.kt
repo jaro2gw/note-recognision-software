@@ -11,8 +11,9 @@ val ToBinary: AbstractImageProcessor = { matrix ->
         255.0,
         Imgproc.ADAPTIVE_THRESH_MEAN_C,
         Imgproc.THRESH_BINARY,
-        75,
+        47,
         -2.0
     )
     ToCircles(6.0)(result)
+//    result
 }

@@ -1,0 +1,3 @@
+src\test\resources\staves\stave-1.png
+src\test\resources\staves\stave-2.png
+src\test\resources\staves\stave-4.png

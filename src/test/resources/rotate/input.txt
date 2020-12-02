@@ -1,0 +1,13 @@
+src\test\resources\rotate\test-rotate+15.png
+src\test\resources\rotate\test-rotate+30.png
+src\test\resources\rotate\test-rotate+45.png
+src\test\resources\rotate\test-rotate+60.png
+src\test\resources\rotate\test-rotate+75.png
+src\test\resources\rotate\test-rotate+90.png
+src\test\resources\rotate\test-rotate.png
+src\test\resources\rotate\test-rotate-15.png
+src\test\resources\rotate\test-rotate-30.png
+src\test\resources\rotate\test-rotate-45.png
+src\test\resources\rotate\test-rotate-60.png
+src\test\resources\rotate\test-rotate-75.png
+src\test\resources\rotate\test-rotate-90.png

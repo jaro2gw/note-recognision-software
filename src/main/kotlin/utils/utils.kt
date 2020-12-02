@@ -4,7 +4,7 @@ infix fun IntRange.intersects(other: IntRange): Boolean = this.last >= other.fir
 
 fun Iterable<Double>.median(): Double {
     val sorted = sorted()
-    if (sorted.isEmpty()) throw NoSuchElementException()
+    if (sorted.isEmpty()) return 0.0
     val half = sorted.size / 2
     return if (sorted.size % 2 == 0) {
         val lower = sorted[half]

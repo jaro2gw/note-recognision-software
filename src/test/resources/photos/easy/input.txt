@@ -1,0 +1,5 @@
+src\test\resources\photos\easy\photo1.jpg
+src\test\resources\photos\easy\photo2.jpg
+src\test\resources\photos\easy\photo3.jpg
+src\test\resources\photos\easy\photo4.jpg
+src\test\resources\photos\easy\photo5.jpg
