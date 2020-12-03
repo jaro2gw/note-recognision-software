@@ -25,3 +25,8 @@ infix fun Rect.mergeWith(other: Rect): Rect {
     val yMax = max(y + height, other.y + other.height)
     return Rect(xMin, yMin, xMax - xMin, yMax - yMin)
 }
+
+operator fun Rect.component1() = x
+operator fun Rect.component2() = y
+operator fun Rect.component3() = width
+operator fun Rect.component4() = height
