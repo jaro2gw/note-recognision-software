@@ -53,8 +53,8 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
         val space = upper.center.y - lower.center.y
         val position = (center.y - lower.center.y) / space
         return 2 * index + when {
-            position <= 0.33 -> 0
-            position <= 0.66 -> 1
+            position <= 0.3 -> 0
+            position <= 0.7 -> 1
             else -> 2
         }
     }
