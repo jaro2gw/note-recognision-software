@@ -6,10 +6,7 @@ import opencv.styles.Color
 import org.opencv.core.Mat
 import org.opencv.core.Point
 import org.opencv.core.Rect
-import utils.center
-import utils.intersects
-import utils.mergeWith
-import utils.ys
+import utils.*
 
 class Stave private constructor(private val lines: Collection<Rect>) : AbstractElement(rect = computeRectangle(lines)) {
     companion object Detector : AbstractRectBasedDetector<Stave>() {
@@ -30,6 +27,7 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
 
         override fun convertToElements(boxes: Collection<Rect>): Collection<Stave> = stitchStaveLines(boxes)
             .sortedBy { it.center.y }
+                .filter { it.width >= 300 }
             .chunked(5) {
                 Stave(it)
             }
@@ -49,7 +47,7 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
         }
 
     private fun positionOnStave(note: Note): Int? {
-        val center = note.head?.center ?: return null
+        val center = note.center
         val (index, lines) = findClosestLines(center) ?: return null
         val (lower, upper) = lines
         val space = upper.center.y - lower.center.y
@@ -68,7 +66,7 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
         sorted.drop(1)
             .map { element ->
                 val note = Note(element.rect)
-                note.head = heads.find { it.center in element.rect }
+//                note.head = heads.find { it.center in element.rect }
                 return@map note
             }
             .forEach { assign(it) }

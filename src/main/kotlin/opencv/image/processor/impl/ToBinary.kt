@@ -14,6 +14,6 @@ val ToBinary: AbstractImageProcessor = { matrix ->
         47,
         -2.0
     )
-    ToCircles(6.0)(result)
-//    result
+    Imgproc.medianBlur(result, result, 7)
+    result
 }

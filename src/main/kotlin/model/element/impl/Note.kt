@@ -3,6 +3,7 @@ package model.element.impl
 import model.element.api.AbstractElement
 import opencv.styles.Color
 import org.opencv.core.Mat
+import org.opencv.core.Point
 import org.opencv.core.Rect
 
 class Note(rect: Rect) : AbstractElement(rect) {
@@ -10,7 +11,13 @@ class Note(rect: Rect) : AbstractElement(rect) {
         G, F, E, D, C, H, A
     }
 
-    var head: Head? = null
+    //    var head: Head? = null
+    val center: Point = if (rect.width * 1.2 > rect.height) {
+        Point(rect.x+rect.width / 2.0, rect.y+rect.height / 2.0)
+    } else {
+        Point(rect.x+rect.width / 2.0, rect.y+rect.height * 5.0 / 6.0)
+    }
+
     var name: Name? = null
     var duration: Duration? = null
 
@@ -27,6 +34,6 @@ class Note(rect: Rect) : AbstractElement(rect) {
 
     override fun drawOn(matrix: Mat) {
         super.drawOn(matrix)
-        head?.drawOn(matrix)
+//        head?.drawOn(matrix)
     }
 }
