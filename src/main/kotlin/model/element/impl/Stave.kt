@@ -47,10 +47,7 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
         }
 
     private fun positionOnStave(note: Note): Int? {
-        val rect = note.rect
-        val x = rect.x + rect.width / 2.0
-        val y = rect.y + rect.height * 5.0 / 6.0
-        val center = Point(x, y)
+        val center = note.center
         val (index, lines) = findClosestLines(center) ?: return null
         val (lower, upper) = lines
         val space = upper.center.y - lower.center.y
@@ -69,7 +66,7 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
         sorted.drop(1)
             .map { element ->
                 val note = Note(element.rect)
-                note.head = heads.find { it.center in element.rect }
+//                note.head = heads.find { it.center in element.rect }
                 return@map note
             }
             .forEach { assign(it) }
