@@ -8,18 +8,19 @@ import org.opencv.core.Point
 import org.opencv.core.Rect
 import utils.*
 
-class Stave private constructor(private val lines: Collection<Rect>) : AbstractElement(rect = computeRectangle(lines)) {
+class Stave(lineBoxes: Collection<Rect>) :
+    AbstractElement(rect = computeRectangle(lineBoxes)) {
     companion object Detector : AbstractRectBasedDetector<Stave>() {
         private fun computeRectangle(lines: Iterable<Rect>): Rect = lines.reduce(Rect::mergeWith)
 
         private fun stitchStaveLines(lines: Collection<Rect>): Collection<Rect> {
             val stitched = mutableSetOf<Rect>()
             lines.forEach { line ->
-                val same = stitched.find { line.ys intersects it.ys }
-                if (same == null) stitched += line
+                val same = stitched.filter { line.ys intersects it.ys }
+                if (same.isEmpty()) stitched += line
                 else {
                     stitched -= same
-                    stitched += same mergeWith line
+                    stitched += same.fold(line, Rect::mergeWith)
                 }
             }
             return stitched
@@ -28,13 +29,11 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
         override fun convertToElements(boxes: Collection<Rect>): Collection<Stave> = stitchStaveLines(boxes)
             .sortedBy { it.center.y }
             .filter { it.width >= 300 }
-            .chunked(5) {
-                Stave(it)
-            }
+            .chunked(5) { Stave(it) }
     }
 
+    private val lines = lineBoxes.sortedBy { it.center.y }
     private val notes: MutableSet<Note> = mutableSetOf()
-
     private var clef: Clef? = null
 
     private fun findClosestLines(center: Point): IndexedValue<Pair<Rect, Rect>>? = lines.zipWithNext()
@@ -70,8 +69,8 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
     }
 
     private fun assign(note: Note) {
-        val position = positionOnStave(note) ?: return
         notes += note
+        val position = positionOnStave(note) ?: return
         val bottom = clef?.type?.note?.ordinal ?: return
         val ordinal = bottom + position
         val names = Note.Name.values()
