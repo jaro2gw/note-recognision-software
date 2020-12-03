@@ -1,0 +1,11 @@
+src/test/resources/photos/IMG20201203172034.jpg
+src/test/resources/photos/IMG20201203172059.jpg
+src/test/resources/photos/IMG20201203172124.jpg
+src/test/resources/photos/IMG20201203172139.jpg
+src/test/resources/photos/IMG20201203172155.jpg
+src/test/resources/photos/IMG20201203172306.jpg
+src/test/resources/photos/IMG20201203172416.jpg
+src/test/resources/photos/IMG20201203172439.jpg
+src/test/resources/photos/IMG20201203172502.jpg
+src/test/resources/photos/IMG20201203172521.jpg
+src/test/resources/photos/IMG20201203172547.jpg

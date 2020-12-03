@@ -27,7 +27,7 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
 
         override fun convertToElements(boxes: Collection<Rect>): Collection<Stave> = stitchStaveLines(boxes)
             .sortedBy { it.center.y }
-                .filter { it.width >= 300 }
+            .filter { it.width >= 300 }
             .chunked(5) {
                 Stave(it)
             }
@@ -59,16 +59,13 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
         }
     }
 
-    fun assign(elements: Collection<Element>, heads: Collection<Head>) {
-        val sorted = elements.sortedBy { it.rect.x }
+    fun assign(elements: Collection<Element>, black: (Point) -> Boolean) {
+        val sorted = elements.sortedBy { it.rect.center.x }
         val clef = sorted.firstOrNull()?.let { Clef(it.rect) } ?: return
         assign(clef)
         sorted.drop(1)
-            .map { element ->
-                val note = Note(element.rect)
-//                note.head = heads.find { it.center in element.rect }
-                return@map note
-            }
+            .map { Note(it.rect) }
+            .onEach { it.assignDuration(black) }
             .forEach { assign(it) }
     }
 
@@ -84,10 +81,10 @@ class Stave private constructor(private val lines: Collection<Rect>) : AbstractE
     private fun assign(clef: Clef) {
         val lower = clef.rect.center.apply { y = clef.rect.y.toDouble() }
         val upper = clef.rect.center.apply { y = clef.rect.y.toDouble() + clef.rect.height }
-        clef.type = if (lower in this.rect && upper in this.rect) {
-            Clef.Type.BASS
-        } else {
+        clef.type = if (lower !in rect && upper !in rect) {
             Clef.Type.TREBLE
+        } else {
+            Clef.Type.BASS
         }
         this.clef = clef
     }
