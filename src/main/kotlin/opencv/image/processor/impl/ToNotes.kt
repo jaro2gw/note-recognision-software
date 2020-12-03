@@ -20,7 +20,7 @@ val ToNotes: (Mat) -> List<Pair<Operation, Mat>> = { matrix ->
 //    val width = matrix.width() / 30.0
     val horizontal = ToHorizontalElements(100.0)(rotated).also { results += Operation.HORIZONTAL to it }
 //    val height = matrix.height() / 90.0
-    val vertical = ToVerticalElements(15.0)(rotated).also { results += Operation.VERTICAL to it }
+    val vertical = ToVerticalElements(20.0)(rotated).also { results += Operation.VERTICAL to it }
 
     val staves = Stave.Detector(horizontal)
     val elements = Element.Detector(vertical)
