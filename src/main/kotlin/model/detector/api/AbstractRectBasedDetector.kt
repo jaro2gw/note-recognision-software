@@ -12,10 +12,18 @@ import utils.*
 abstract class AbstractRectBasedDetector<T : AbstractElement> : AbstractDetector<T>() {
     abstract fun convertToElements(boxes: Collection<Rect>): Collection<T>
 
-    private fun group(contours: Collection<Rect>): Collection<Rect> {
+    private fun offset(rect: Rect, v: Double): Rect {
+        val (x, y, w, h) = rect
+        val lower = Point(x - v, y - v)
+        val upper = Point(x + w + v, y + h + v)
+        return Rect(lower, upper)
+    }
+
+    private fun groups(contours: Collection<Rect>): Collection<Rect> {
         val groups = mutableListOf<Rect>()
         contours.forEach { contour ->
-            val same = groups.filter { it intersects contour }
+            val offset = offset(contour, 15.0)
+            val same = groups.filter { it intersects offset }
             if (same.isEmpty()) groups += contour
             else {
                 groups -= same
@@ -39,14 +47,8 @@ abstract class AbstractRectBasedDetector<T : AbstractElement> : AbstractDetector
     }
 
     override fun invoke(matrix: Mat): Collection<T> {
-        val offset = 15.0
-        return contours(matrix)
-            .map { (x, y, w, h) ->
-                val lower = Point(x - offset, y - offset)
-                val upper = Point(x + w + offset, y + h + offset)
-                Rect(lower, upper)
-            }
-            .let { group(it) }
-            .let { convertToElements(it) }
+        val contours = contours(matrix)
+        val groups = groups(contours)
+        return convertToElements(groups)
     }
 }
