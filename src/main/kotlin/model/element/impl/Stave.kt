@@ -8,8 +8,7 @@ import org.opencv.core.Point
 import org.opencv.core.Rect
 import utils.*
 
-class Stave(lineBoxes: Collection<Rect>) :
-    AbstractElement(rect = computeRectangle(lineBoxes)) {
+class Stave(private val lines: Collection<Rect>) : AbstractElement(rect = computeRectangle(lines)) {
     companion object Detector : AbstractRectBasedDetector<Stave>() {
         private fun computeRectangle(lines: Iterable<Rect>): Rect = lines.reduce(Rect::mergeWith)
 
@@ -27,12 +26,15 @@ class Stave(lineBoxes: Collection<Rect>) :
         }
 
         override fun convertToElements(boxes: Collection<Rect>): Collection<Stave> = stitchStaveLines(boxes)
+            .asSequence()
             .sortedBy { it.center.y }
-            .filter { it.width >= 300 }
-            .chunked(5) { Stave(it) }
+            .filter { it.width >= 1000 }
+            .chunked(5)
+            .filter { it.size == 5 }
+            .map { Stave(it) }
+            .toList()
     }
 
-    private val lines = lineBoxes.sortedBy { it.center.y }
     private val notes: MutableSet<Note> = mutableSetOf()
     private var clef: Clef? = null
 
@@ -58,12 +60,27 @@ class Stave(lineBoxes: Collection<Rect>) :
         }
     }
 
-    fun assign(elements: Collection<Element>, black: (Point) -> Boolean) {
-        val sorted = elements.sortedBy { it.rect.center.x }
-        val clef = sorted.firstOrNull()?.let { Clef(it.rect) } ?: return
-        assign(clef)
-        sorted.drop(1)
-            .map { Note(it.rect) }
+    private fun findClefType(rect: Rect): Clef.Type? {
+        if (!this.rect.intersects(rect)) return null
+        val lower = rect.center.apply { y = rect.y.toDouble() }
+        val upper = rect.center.apply { y = rect.y.toDouble() + rect.height }
+        return if (lower !in this.rect && upper !in this.rect) Clef.Type.TREBLE
+        else Clef.Type.BASS
+    }
+
+    private fun findClef(elements: Collection<Rect>): Clef? {
+        if (elements.isEmpty()) return null
+        val sorted = elements.sortedBy { it.center.x }
+        val element = sorted[0]
+        val type = findClefType(element) ?: return null
+        return Clef(element, type)
+    }
+
+    fun assign(elements: Collection<Rect>, black: (Point) -> Boolean) {
+        val clef = findClef(elements) ?: return
+        this.clef = clef
+        elements.filterNot { it intersects clef.rect }
+            .map { Note(it) }
             .onEach { it.assignDuration(black) }
             .forEach { assign(it) }
     }
@@ -77,24 +94,13 @@ class Stave(lineBoxes: Collection<Rect>) :
         note.name = names[ordinal % names.size]
     }
 
-    private fun assign(clef: Clef) {
-        val lower = clef.rect.center.apply { y = clef.rect.y.toDouble() }
-        val upper = clef.rect.center.apply { y = clef.rect.y.toDouble() + clef.rect.height }
-        clef.type = if (lower !in rect && upper !in rect) {
-            Clef.Type.TREBLE
-        } else {
-            Clef.Type.BASS
-        }
-        this.clef = clef
-    }
-
     override fun getLabel(): String = "Stave"
 
     override fun getColor(): Color = Color.BLUE
 
     override fun drawOn(matrix: Mat) {
         super.drawOn(matrix)
-        notes.forEach { it.drawOn(matrix) }
         clef?.drawOn(matrix)
+        notes.forEach { it.drawOn(matrix) }
     }
 }

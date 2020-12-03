@@ -26,6 +26,14 @@ infix fun Rect.mergeWith(other: Rect): Rect {
     return Rect(xMin, yMin, xMax - xMin, yMax - yMin)
 }
 
+fun Rect.expand(v: Double): Rect {
+    val (x, y, w, h) = this
+    val lower = Point(x - v, y - v)
+    val upper = Point(x + w + v, y + h + v)
+    return Rect(lower, upper)
+}
+
+
 operator fun Rect.component1() = x
 operator fun Rect.component2() = y
 operator fun Rect.component3() = width
