@@ -33,7 +33,13 @@ val ToNotes: (Mat) -> List<Pair<Operation, Mat>> = { matrix ->
     val target = rotate(matrix).also { results += Operation.TARGET to it }
 
     fun black(point: Point): Boolean {
-        return false
+        var sum = 0.0
+        for (i in -20..20) {
+            val pixel = target[point.y.toInt() + i, point.x.toInt() + i]
+            val (blue, green, red) = pixel
+            sum += (blue + green + red) / 3
+        }
+        return sum / 40 < 75
     }
 
     staves.forEach { stave ->

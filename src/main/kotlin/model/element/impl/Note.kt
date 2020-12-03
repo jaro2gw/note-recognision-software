@@ -37,12 +37,12 @@ class Note(rect: Rect) : AbstractElement(rect) {
 //        head?.drawOn(matrix)
     }
 
-    public fun assignDuration(black: (Point) -> Boolean): Duration {
-        return when {
+    public fun assignDuration(black: (Point) -> Boolean) {
+        duration = when {
             rect.width * 1.2 > rect.height -> {
                 Duration.WHOLE
             }
-            rect.width * 2 > rect.height -> {
+            rect.width * 1.8 > rect.height -> {
                 Duration.EIGHT
             }
             black(center) -> {
