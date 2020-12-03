@@ -13,9 +13,9 @@ class Note(rect: Rect) : AbstractElement(rect) {
 
     //    var head: Head? = null
     val center: Point = if (rect.width * 1.2 > rect.height) {
-        Point(rect.x+rect.width / 2.0, rect.y+rect.height / 2.0)
+        Point(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0)
     } else {
-        Point(rect.x+rect.width / 2.0, rect.y+rect.height * 5.0 / 6.0)
+        Point(rect.x + rect.width / 2.0, rect.y + rect.height * 5.0 / 6.0)
     }
 
     var name: Name? = null
@@ -35,5 +35,22 @@ class Note(rect: Rect) : AbstractElement(rect) {
     override fun drawOn(matrix: Mat) {
         super.drawOn(matrix)
 //        head?.drawOn(matrix)
+    }
+
+    public fun assignDuration(black: (Point) -> Boolean): Duration {
+        return when {
+            rect.width * 1.2 > rect.height -> {
+                Duration.WHOLE
+            }
+            rect.width * 2 > rect.height -> {
+                Duration.EIGHT
+            }
+            black(center) -> {
+                Duration.QUARTER
+            }
+            else -> {
+                Duration.HALF
+            }
+        }
     }
 }
