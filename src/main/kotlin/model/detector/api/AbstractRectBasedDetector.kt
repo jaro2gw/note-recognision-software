@@ -13,17 +13,6 @@ import utils.mergeWith
 abstract class AbstractRectBasedDetector<T : AbstractElement> : AbstractDetector<T>() {
     abstract fun convertToElements(boxes: Collection<Rect>): Collection<T>
 
-    private fun groups(contours: Collection<Rect>): Collection<Rect> {
-        val groups = mutableSetOf<Rect>()
-        contours.forEach { contour ->
-            val offset = contour.expand(15.0)
-            val same = groups.filter { it intersects offset }
-            groups -= same
-            groups += same.fold(contour, Rect::mergeWith)
-        }
-        return groups
-    }
-
     private fun contours(matrix: Mat): Collection<Rect> {
         val points = mutableListOf<MatOfPoint>()
         val hierarchy = Mat()
@@ -40,7 +29,6 @@ abstract class AbstractRectBasedDetector<T : AbstractElement> : AbstractDetector
 
     override fun invoke(matrix: Mat): Collection<T> {
         val contours = contours(matrix)
-        val groups = groups(contours)
-        return convertToElements(groups)
+        return convertToElements(contours)
     }
 }

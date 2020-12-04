@@ -38,7 +38,7 @@ class Stave(private val lines: Collection<Rect>) : AbstractElement(rect = comput
     private val notes: MutableSet<Note> = mutableSetOf()
     private var clef: Clef? = null
 
-    private fun findClosestLines(center: Point): IndexedValue<Pair<Rect, Rect>>? = lines.zipWithNext()
+    private fun checkBetweenLines(center: Point): IndexedValue<Pair<Rect, Rect>>? = lines.zipWithNext()
         .withIndex()
         .find { (_, lines) ->
             val (lower, upper) = lines
@@ -47,9 +47,22 @@ class Stave(private val lines: Collection<Rect>) : AbstractElement(rect = comput
             return@find above && below
         }
 
+    private fun checkBoundaries(center: Point): Int? {
+        val lower = lines.first()
+        if (center.y <= lower.center.y) return 0
+        val upper = lines.last()
+        if (center.y >= upper.center.y) return 4
+        return null
+    }
+
+
     private fun positionOnStave(note: Note): Int? {
         val center = note.center
-        val (index, lines) = findClosestLines(center) ?: return null
+
+        val boundary = checkBoundaries(center)
+        if (boundary != null) return 2 * boundary
+
+        val (index, lines) = checkBetweenLines(center) ?: return null
         val (lower, upper) = lines
         val space = upper.center.y - lower.center.y
         val position = (center.y - lower.center.y) / space
