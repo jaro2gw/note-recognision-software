@@ -29,6 +29,7 @@ class Stave(private val lines: Collection<Rect>) : AbstractElement(rect = comput
             .asSequence()
             .sortedBy { it.center.y }
             .filter { it.width >= 1000 }
+            .filter { it.height <= 50 }
             .chunked(5)
             .filter { it.size == 5 }
             .map { Stave(it) }
