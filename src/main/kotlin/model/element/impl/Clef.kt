@@ -12,5 +12,5 @@ class Clef(rect: Rect, val type: Type) : AbstractElement(rect) {
 
     override fun getLabel(): String = "Clef(${type})"
 
-    override fun getColor(): Color = Color.RED
+    override fun getColor(): Color = Color.ORANGE
 }
